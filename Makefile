@@ -17,10 +17,10 @@ dropdb:
 	docker exec -it postgres15 dropdb mingle
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:pass@0.0.0.0:5432/mingle?sslmode=disable" -verbose up
+	migrate -path db/migrations -database "postgresql://root:pass@0.0.0.0:5432/mingle?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:pass@0.0.0.0:5432/mingle?sslmode=disable" -verbose down
+	migrate -path db/migrations -database "postgresql://root:pass@0.0.0.0:5432/mingle?sslmode=disable" -verbose down
 
 .PHONY: 
 	createdb
