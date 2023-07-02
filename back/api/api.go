@@ -3,24 +3,32 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/atedesch1/mingle/db"
 )
 
 type Handler struct {
-	addr   string
-	router *gin.Engine
-	storage  db.Storage
+	addr    string
+	router  *gin.Engine
+	storage db.Storage
 }
 
 func NewHandler(storage db.Storage, addr string) *Handler {
 	handler := &Handler{
-		addr:  addr,
+		addr:    addr,
 		storage: storage,
 	}
 
 	router := gin.New()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173"}
+	// config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	// config.AllowHeaders = []string{"Origin", "Authorization"}
+
+	router.Use(cors.New(config))
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
