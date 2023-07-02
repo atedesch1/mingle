@@ -4,7 +4,7 @@ import "github.com/atedesch1/mingle/models"
 
 type UserStore interface {
 	GetUser(id uint64) (models.User, error)
-	GetUsers(id uint64) ([]models.User, error)
+	GetUsers() ([]models.User, error)
 	CreateUser(params models.UserCreateParams) (models.User, error)
 	DeleteUser(id uint64) error
 }

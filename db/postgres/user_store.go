@@ -24,7 +24,7 @@ func (s *UserStore) GetUser(id uint64) (models.User, error) {
 
 const getUsersQuery = `SELECT * FROM users`
 
-func (s *UserStore) GetUsers(id uint64) ([]models.User, error) {
+func (s *UserStore) GetUsers() ([]models.User, error) {
 	users := []models.User{}
 	if err := s.Get(&users, getUsersQuery); err != nil {
 		return users, fmt.Errorf("error getting users: %w", err)
