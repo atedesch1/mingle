@@ -26,7 +26,7 @@ const getMessagesQuery = `SELECT * FROM messages`
 
 func (s *MessageStore) GetMessages() ([]models.Message, error) {
 	messages := []models.Message{}
-	if err := s.Get(&messages, getMessagesQuery); err != nil {
+	if err := s.Select(&messages, getMessagesQuery); err != nil {
 		return messages, fmt.Errorf("error getting messages: %w", err)
 	}
 	return messages, nil
@@ -36,7 +36,7 @@ const getLatestMessagesQuery = `SELECT * FROM messages WHERE ORDER BY id DESC LI
 
 func (s *MessageStore) GetLatestMessages(quantity uint) ([]models.Message, error) {
 	messages := []models.Message{}
-	if err := s.Get(&messages, getLatestMessagesQuery, quantity); err != nil {
+	if err := s.Select(&messages, getLatestMessagesQuery, quantity); err != nil {
 		return messages, fmt.Errorf("error getting messages: %w", err)
 	}
 	return messages, nil
@@ -46,7 +46,7 @@ const getMessagesRangeQuery = `SELECT * FROM messages WHERE id < $1 ORDER BY id 
 
 func (s *MessageStore) GetMessagesRange(begin uint, quantity uint) ([]models.Message, error) {
 	messages := []models.Message{}
-	if err := s.Get(&messages, getMessagesRangeQuery, begin, quantity); err != nil {
+	if err := s.Select(&messages, getMessagesRangeQuery, begin, quantity); err != nil {
 		return messages, fmt.Errorf("error getting messages: %w", err)
 	}
 	return messages, nil
@@ -65,6 +65,10 @@ func (s *MessageStore) CreateMessage(params models.MessageCreateParams) (models.
 const deleteMessageQuery = `DELETE FROM messages WHERE id = $1`
 
 func (s *MessageStore) DeleteMessage(id uint64) error {
+    message := models.Message{}
+	if err := s.Get(&message, getMessageQuery, id); err != nil {
+		return fmt.Errorf("error deleting message: %w", err)
+	}
 	if _, err := s.Exec(deleteMessageQuery, id); err != nil {
 		return fmt.Errorf("error deleting message: %w", err)
 	}
