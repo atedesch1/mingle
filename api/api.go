@@ -30,6 +30,24 @@ func NewHandler(storage db.Storage, addr string) *Handler {
 		})
 	})
 
+	v1 := router.Group("v1")
+	{
+		userGroup := v1.Group("user")
+		{
+			userGroup.GET("/:id", handler.getUser)
+			userGroup.GET("/", handler.getUsers)
+			userGroup.POST("/", handler.createUser)
+			userGroup.DELETE("/:id", handler.deleteUser)
+		}
+
+		messageGroup := v1.Group("message")
+		{
+			messageGroup.GET("/", handler.getMessages)
+			messageGroup.GET("/:id", handler.getMessage)
+			messageGroup.POST("/", handler.createMessage)
+			messageGroup.DELETE("/:id", handler.deleteMessage)
+		}
+	}
 
 	handler.router = router
 	return handler
