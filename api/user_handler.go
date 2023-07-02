@@ -3,8 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/atedesch1/mingle/models"
 	"github.com/gin-gonic/gin"
+
+	"github.com/atedesch1/mingle/models"
 )
 
 type userIDRequestURI struct {
@@ -28,7 +29,7 @@ func (h *Handler) getUser(ctx *gin.Context) {
 }
 
 func (h *Handler) getUsers(ctx *gin.Context) {
-    users, err := h.storage.GetUsers()
+	users, err := h.storage.GetUsers()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -36,7 +37,6 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, users)
 }
-
 
 type createUserRequestBody struct {
 	Name string `json:"name" binding:"required"`

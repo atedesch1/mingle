@@ -3,12 +3,13 @@ package api
 import (
 	"net/http"
 
-	"github.com/atedesch1/mingle/models"
 	"github.com/gin-gonic/gin"
+
+	"github.com/atedesch1/mingle/models"
 )
 
 const (
-    DefaultRequestQuantity uint = 10
+	DefaultRequestQuantity uint = 10
 )
 
 type messageIDRequestURI struct {
@@ -32,7 +33,7 @@ func (h *Handler) getMessage(ctx *gin.Context) {
 }
 
 func (h *Handler) getMessages(ctx *gin.Context) {
-    messages, err := h.storage.GetMessages()
+	messages, err := h.storage.GetMessages()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -42,7 +43,7 @@ func (h *Handler) getMessages(ctx *gin.Context) {
 }
 
 type getLatestMessagesRequestBody struct {
-    Quantity *uint `json:"quantity,omitempty"`
+	Quantity *uint `json:"quantity,omitempty" binding:"min=1"`
 }
 
 func (h *Handler) getLatestMessages(ctx *gin.Context) {
@@ -52,12 +53,12 @@ func (h *Handler) getLatestMessages(ctx *gin.Context) {
 		return
 	}
 
-    quantity := DefaultRequestQuantity
-    if reqBody.Quantity != nil {
-        quantity = *reqBody.Quantity
-    }
+	quantity := DefaultRequestQuantity
+	if reqBody.Quantity != nil {
+		quantity = *reqBody.Quantity
+	}
 
-    messages, err := h.storage.GetLatestMessages(quantity)
+	messages, err := h.storage.GetLatestMessages(quantity)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -67,8 +68,8 @@ func (h *Handler) getLatestMessages(ctx *gin.Context) {
 }
 
 type getMessagesRangeRequestBody struct {
-	FromID uint64 `json:"from_id" binding:"required"`
-    Quantity *uint `json:"quantity,omitempty"`
+	FromID   uint64 `json:"from_id"            binding:"required,min=1"`
+	Quantity *uint  `json:"quantity,omitempty" binding:"min=1"`
 }
 
 func (h *Handler) getMessagesRange(ctx *gin.Context) {
@@ -78,12 +79,12 @@ func (h *Handler) getMessagesRange(ctx *gin.Context) {
 		return
 	}
 
-    quantity := DefaultRequestQuantity
-    if reqBody.Quantity != nil {
-        quantity = *reqBody.Quantity
-    }
+	quantity := DefaultRequestQuantity
+	if reqBody.Quantity != nil {
+		quantity = *reqBody.Quantity
+	}
 
-    messages, err := h.storage.GetMessagesRange(reqBody.FromID, quantity)
+	messages, err := h.storage.GetMessagesRange(reqBody.FromID, quantity)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -92,10 +93,9 @@ func (h *Handler) getMessagesRange(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, messages)
 }
 
-
 type createMessageRequestBody struct {
-	UserID uint64 `json:"user_id" binding:"required"`
-    Content string `json:"content" binding:"required"`
+	UserID  uint64 `json:"user_id" binding:"required,min=1"`
+	Content string `json:"content" binding:"required"`
 }
 
 func (h *Handler) createMessage(ctx *gin.Context) {
@@ -106,8 +106,8 @@ func (h *Handler) createMessage(ctx *gin.Context) {
 	}
 
 	params := models.MessageCreateParams{
-        UserID: reqBody.UserID,
-        Content: reqBody.Content,
+		UserID:  reqBody.UserID,
+		Content: reqBody.Content,
 	}
 	message, err := h.storage.CreateMessage(params)
 	if err != nil {
