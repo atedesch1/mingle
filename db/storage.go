@@ -13,7 +13,7 @@ type MessageStore interface {
 	GetMessage(id uint64) (models.Message, error)
 	GetMessages() ([]models.Message, error)
 	GetLatestMessages(quantity uint) ([]models.Message, error)
-	GetMessagesRange(begin uint, quantity uint) ([]models.Message, error)
+	GetMessagesRange(fromID uint64, quantity uint) ([]models.Message, error)
 	CreateMessage(params models.MessageCreateParams) (models.Message, error)
 	DeleteMessage(id uint64) error
 }

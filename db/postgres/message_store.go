@@ -32,7 +32,7 @@ func (s *MessageStore) GetMessages() ([]models.Message, error) {
 	return messages, nil
 }
 
-const getLatestMessagesQuery = `SELECT * FROM messages WHERE ORDER BY id DESC LIMIT $1`
+const getLatestMessagesQuery = `SELECT * FROM messages ORDER BY id DESC LIMIT $1`
 
 func (s *MessageStore) GetLatestMessages(quantity uint) ([]models.Message, error) {
 	messages := []models.Message{}
@@ -44,9 +44,9 @@ func (s *MessageStore) GetLatestMessages(quantity uint) ([]models.Message, error
 
 const getMessagesRangeQuery = `SELECT * FROM messages WHERE id < $1 ORDER BY id DESC LIMIT $2`
 
-func (s *MessageStore) GetMessagesRange(begin uint, quantity uint) ([]models.Message, error) {
+func (s *MessageStore) GetMessagesRange(fromID uint64, quantity uint) ([]models.Message, error) {
 	messages := []models.Message{}
-	if err := s.Select(&messages, getMessagesRangeQuery, begin, quantity); err != nil {
+	if err := s.Select(&messages, getMessagesRangeQuery, fromID, quantity); err != nil {
 		return messages, fmt.Errorf("error getting messages: %w", err)
 	}
 	return messages, nil
