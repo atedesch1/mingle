@@ -93,6 +93,35 @@ func (h *Handler) getMessagesRange(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, messages)
 }
 
+func (h *Handler) subscribeToMessages(ctx *gin.Context) {
+	// Setup SSE
+	ctx.Header("Content-Type", "text/event-stream")
+	ctx.Header("Cache-Control", "no-cache")
+	ctx.Header("Connection", "keep-alive")
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	flusher, ok := ctx.Writer.(http.Flusher)
+	if !ok {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	messageChan := make(chan []byte)
+	defer close(messageChan)
+
+	go h.storage.SubscribeToMessages(messageChan)
+
+	for {
+		select {
+		case message := <-messageChan:
+			_, _ = ctx.Writer.WriteString("data: " + string(message) + "\n\n")
+			flusher.Flush()
+		case <-ctx.Request.Context().Done():
+			return
+		}
+	}
+}
+
 type createMessageRequestBody struct {
 	UserID  uint64 `json:"user_id" binding:"required,min=1"`
 	Content string `json:"content" binding:"required"`

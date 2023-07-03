@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 
@@ -51,6 +52,19 @@ func (s *MessageStore) GetMessagesRange(fromID uint64, quantity uint) ([]models.
 		return messages, fmt.Errorf("error getting messages: %w", err)
 	}
 	return messages, nil
+}
+
+const messageChannelName = `message_channel`
+
+func (s *MessageStore) SubscribeToMessages(messageChannel chan<- []byte) {
+    notifier, err := newNotifier(s.dsn, messageChannelName)
+    if err != nil {
+        log.Println(err.Error())
+    }
+
+    if err := notifier.fetch(messageChannel); err != nil {
+        log.Println(err.Error())
+    }
 }
 
 const createMessageQuery = `INSERT INTO messages (user_id, content) VALUES ($1, $2) RETURNING *`
