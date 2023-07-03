@@ -10,6 +10,7 @@ import (
 
 type UserStore struct {
 	*sqlx.DB
+    dsn string
 }
 
 const getUserQuery = `SELECT * FROM users WHERE id = $1`

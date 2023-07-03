@@ -7,8 +7,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func NewPostgresStorage(dataSourceName string) (*PostgresStorage, error) {
-	db, err := sqlx.Open("postgres", dataSourceName)
+func NewPostgresStorage(dsn string) (*PostgresStorage, error) {
+	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
@@ -19,9 +19,11 @@ func NewPostgresStorage(dataSourceName string) (*PostgresStorage, error) {
 	return &PostgresStorage{
 		UserStore: &UserStore{
 			DB: db,
+            dsn: dsn,
 		},
 		MessageStore: &MessageStore{
 			DB: db,
+            dsn: dsn,
 		},
 	}, nil
 }

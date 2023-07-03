@@ -10,6 +10,7 @@ import (
 
 type MessageStore struct {
 	*sqlx.DB
+    dsn string
 }
 
 const getMessageQuery = `SELECT * FROM messages WHERE id = $1`
