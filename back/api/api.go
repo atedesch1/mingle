@@ -52,9 +52,9 @@ func NewHandler(storage db.Storage, addr string) *Handler {
 		{
 			messageGroup.GET("/:id", handler.getMessage)
 			messageGroup.GET("/", handler.getMessages)
-			messageGroup.GET("/latest", handler.getLatestMessages)
+			messageGroup.POST("/latest", handler.getLatestMessages)
 			messageGroup.GET("/subscribe", handler.subscribeToMessages)
-			messageGroup.GET("/range", handler.getMessagesRange)
+			messageGroup.POST("/range", handler.getMessagesRange)
 			messageGroup.POST("/", handler.createMessage)
 			messageGroup.DELETE("/:id", handler.deleteMessage)
 		}

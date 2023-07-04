@@ -45,7 +45,7 @@ func (h *Handler) getMessages(ctx *gin.Context) {
 }
 
 type getLatestMessagesRequestBody struct {
-	Quantity *uint `json:"quantity,omitempty" binding:"min=1"`
+	Quantity *uint `json:"quantity,omitempty"`
 }
 
 func (h *Handler) getLatestMessages(ctx *gin.Context) {
@@ -70,8 +70,8 @@ func (h *Handler) getLatestMessages(ctx *gin.Context) {
 }
 
 type getMessagesRangeRequestBody struct {
-	FromID   uint64 `json:"from_id"            binding:"required,min=1"`
-	Quantity *uint  `json:"quantity,omitempty" binding:"min=1"`
+	FromID   uint64 `json:"fromId"            binding:"required,min=1"`
+	Quantity *uint  `json:"quantity,omitempty"`
 }
 
 func (h *Handler) getMessagesRange(ctx *gin.Context) {
@@ -151,7 +151,7 @@ func (h *Handler) subscribeToMessages(ctx *gin.Context) {
 }
 
 type createMessageRequestBody struct {
-	UserID  uint64 `json:"user_id" binding:"required,min=1"`
+	UserID  uint64 `json:"userId" binding:"required,min=1"`
 	Content string `json:"content" binding:"required"`
 }
 
