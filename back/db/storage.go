@@ -14,7 +14,7 @@ type MessageStore interface {
 	GetMessages() ([]models.Message, error)
 	GetLatestMessages(quantity uint) ([]models.Message, error)
 	GetMessagesRange(fromID uint64, quantity uint) ([]models.Message, error)
-	SubscribeToMessages(messageChannel chan<- []byte)
+	SubscribeToMessages(messageChannel chan<- []byte, unsubscribe chan struct{})
 	CreateMessage(params models.MessageCreateParams) (models.Message, error)
 	DeleteMessage(id uint64) error
 }

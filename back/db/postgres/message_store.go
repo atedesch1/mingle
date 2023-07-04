@@ -11,7 +11,7 @@ import (
 
 type MessageStore struct {
 	*sqlx.DB
-    dsn string
+	dsn string
 }
 
 const getMessageQuery = `SELECT * FROM messages WHERE id = $1`
@@ -56,15 +56,16 @@ func (s *MessageStore) GetMessagesRange(fromID uint64, quantity uint) ([]models.
 
 const messageChannelName = `message_channel`
 
-func (s *MessageStore) SubscribeToMessages(messageChannel chan<- []byte) {
-    notifier, err := newNotifier(s.dsn, messageChannelName)
-    if err != nil {
-        log.Println(err.Error())
-    }
+func (s *MessageStore) SubscribeToMessages(messageChannel chan<- []byte, unsubscribe chan struct{}) {
+	notifier, err := newNotifier(s.dsn, messageChannelName)
+	if err != nil {
+		log.Println(err.Error())
+	}
 
-    if err := notifier.fetch(messageChannel); err != nil {
-        log.Println(err.Error())
-    }
+	if err := notifier.fetch(messageChannel, unsubscribe); err != nil {
+		log.Println(err.Error())
+		unsubscribe <- struct{}{}
+	}
 }
 
 const createMessageQuery = `INSERT INTO messages (user_id, content) VALUES ($1, $2) RETURNING *`
@@ -80,7 +81,7 @@ func (s *MessageStore) CreateMessage(params models.MessageCreateParams) (models.
 const deleteMessageQuery = `DELETE FROM messages WHERE id = $1`
 
 func (s *MessageStore) DeleteMessage(id uint64) error {
-    message := models.Message{}
+	message := models.Message{}
 	if err := s.Get(&message, getMessageQuery, id); err != nil {
 		return fmt.Errorf("error deleting message: %w", err)
 	}

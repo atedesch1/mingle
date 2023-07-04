@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/atedesch1/mingle/models"
 )
@@ -108,15 +110,41 @@ func (h *Handler) subscribeToMessages(ctx *gin.Context) {
 
 	messageChan := make(chan []byte)
 	defer close(messageChan)
+	unsubscribe := make(chan struct{})
+	defer close(unsubscribe)
 
-	go h.storage.SubscribeToMessages(messageChan)
+	go h.storage.SubscribeToMessages(messageChan, unsubscribe)
+
+	marshalfromDBToJSON := func(data []byte, v interface{}) ([]byte, error) {
+		err := jsoniter.Config{
+			TagKey: "db",
+		}.Froze().Unmarshal(data, &v)
+		if err != nil {
+			return nil, err
+		}
+		json, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		return json, nil
+	}
 
 	for {
 		select {
 		case message := <-messageChan:
-			_, _ = ctx.Writer.WriteString("data: " + string(message) + "\n\n")
+			var msg models.Message
+			json, err := marshalfromDBToJSON(message, &msg)
+			if err != nil {
+				unsubscribe <- struct{}{}
+				return
+			}
+
+			_, _ = ctx.Writer.WriteString("data: " + string(json) + "\n\n")
 			flusher.Flush()
 		case <-ctx.Request.Context().Done():
+			unsubscribe <- struct{}{}
+			return
+		case <-unsubscribe:
 			return
 		}
 	}

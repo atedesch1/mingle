@@ -44,7 +44,7 @@ func (n *notifier) logListener(event pq.ListenerEventType, err error) {
 	}
 }
 
-func (n *notifier) fetch(data chan<- []byte) error {
+func (n *notifier) fetch(data chan<- []byte, stop <-chan struct{}) error {
 	var fetchCounter uint64
 	for {
 		select {
@@ -54,7 +54,11 @@ func (n *notifier) fetch(data chan<- []byte) error {
 			}
 			fetchCounter++
 			data <- []byte(e.Extra)
+		case <-stop:
+			n.close()
+			return nil
 		case err := <-n.failed:
+			n.close()
 			return err
 		case <-time.After(time.Minute):
 			go n.listener.Ping()
