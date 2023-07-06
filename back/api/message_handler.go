@@ -2,10 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
+
+	. "github.com/atedesch1/mingle/errors"
 
 	"github.com/atedesch1/mingle/models"
 )
@@ -27,7 +30,12 @@ func (h *Handler) getMessage(ctx *gin.Context) {
 
 	message, err := h.storage.GetMessage(reqURI.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		var notFoundError *NotFoundError
+		if errors.As(err, &notFoundError) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
 		return
 	}
 
@@ -162,6 +170,16 @@ func (h *Handler) createMessage(ctx *gin.Context) {
 		return
 	}
 
+	if _, err := h.storage.GetUser(reqBody.UserID); err != nil {
+		var notFoundError *NotFoundError
+		if errors.As(err, &notFoundError) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
+		return
+	}
+
 	params := models.MessageCreateParams{
 		UserID:  reqBody.UserID,
 		Content: reqBody.Content,
@@ -179,6 +197,16 @@ func (h *Handler) deleteMessage(ctx *gin.Context) {
 	var reqURI messageIDRequestURI
 	if err := ctx.ShouldBindUri(&reqURI); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if _, err := h.storage.GetMessage(reqURI.ID); err != nil {
+		var notFoundError *NotFoundError
+		if errors.As(err, &notFoundError) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
 		return
 	}
 

@@ -1,10 +1,12 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	. "github.com/atedesch1/mingle/errors"
 	"github.com/atedesch1/mingle/models"
 )
 
@@ -21,7 +23,12 @@ func (h *Handler) getUser(ctx *gin.Context) {
 
 	user, err := h.storage.GetUser(reqURI.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		var notFoundError *NotFoundError
+		if errors.As(err, &notFoundError) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
 		return
 	}
 
@@ -65,6 +72,16 @@ func (h *Handler) deleteUser(ctx *gin.Context) {
 	var reqURI userIDRequestURI
 	if err := ctx.ShouldBindUri(&reqURI); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if _, err := h.storage.GetUser(reqURI.ID); err != nil {
+		var notFoundError *NotFoundError
+		if errors.As(err, &notFoundError) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
 		return
 	}
 
