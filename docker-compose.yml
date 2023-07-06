@@ -1,0 +1,43 @@
+version: "3.9"
+
+networks:
+  mingle:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mingle-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: core
+    command: [ "postgres", "-c", "log_statement=all" ]
+    ports:
+      - "5432:5432/tcp"
+    restart: always
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    networks:
+      - mingle
+
+  api:
+    container_name: mingle-api
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile.back
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://root:root@db:5432/core?sslmode=disable
+    volumes:
+      - ./back:/app
+    networks:
+      - mingle
+
+
+volumes:
+  postgres-db:

@@ -2,7 +2,7 @@ build:
 	go build -o bin/mingle
 
 run: build
-	./bin/mingle
+	DATABASE_URL="postgresql://root:pass@0.0.0.0:5432/mingle?sslmode=disable" ./bin/mingle
 
 test:
 	go test ./...

@@ -3,6 +3,9 @@ package db
 import (
 	"fmt"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -16,19 +19,25 @@ func NewPostgresStorage(dsn string) (*PostgresStorage, error) {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://db/migrations",
+		"postgres", driver)
+	m.Up()
+
 	return &PostgresStorage{
 		UserStore: &UserStore{
-			DB: db,
-            dsn: dsn,
+			DB:  db,
+			dsn: dsn,
 		},
 		MessageStore: &MessageStore{
-			DB: db,
-            dsn: dsn,
+			DB:  db,
+			dsn: dsn,
 		},
 	}, nil
 }
 
 type PostgresStorage struct {
-    *UserStore
-    *MessageStore
+	*UserStore
+	*MessageStore
 }
