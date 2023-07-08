@@ -15,7 +15,10 @@ type UserStore struct {
 	dsn string
 }
 
-const getUserQuery = `SELECT * FROM users WHERE id = $1`
+const getUserQuery = `
+SELECT * 
+FROM users 
+WHERE id = $1`
 
 func (s *UserStore) GetUser(id uint64) (models.User, error) {
 	user := models.User{}
@@ -29,7 +32,9 @@ func (s *UserStore) GetUser(id uint64) (models.User, error) {
 	return user, nil
 }
 
-const getUsersQuery = `SELECT * FROM users`
+const getUsersQuery = `
+SELECT * 
+FROM users`
 
 func (s *UserStore) GetUsers() ([]models.User, error) {
 	users := []models.User{}
@@ -39,7 +44,10 @@ func (s *UserStore) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-const createUserQuery = `INSERT INTO users (name) VALUES ($1) RETURNING *`
+const createUserQuery = `
+INSERT INTO users (name) 
+VALUES ($1) 
+RETURNING *`
 
 func (s *UserStore) CreateUser(params models.UserCreateParams) (models.User, error) {
 	user := models.User{}
@@ -49,7 +57,9 @@ func (s *UserStore) CreateUser(params models.UserCreateParams) (models.User, err
 	return user, nil
 }
 
-const deleteUserQuery = `DELETE FROM users WHERE id = $1`
+const deleteUserQuery = `
+DELETE FROM users 
+WHERE id = $1`
 
 func (s *UserStore) DeleteUser(id uint64) error {
 	if _, err := s.Exec(deleteUserQuery, id); err != nil {

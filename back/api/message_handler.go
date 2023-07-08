@@ -9,7 +9,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 
 	. "github.com/atedesch1/mingle/errors"
-
 	"github.com/atedesch1/mingle/models"
 )
 
@@ -43,6 +42,16 @@ func (h *Handler) getMessage(ctx *gin.Context) {
 }
 
 func (h *Handler) getMessages(ctx *gin.Context) {
+	if ctx.Query("expand") == "user" {
+		messages, err := h.storage.GetMessagesExpandedUser()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, messages)
+	}
+
 	messages, err := h.storage.GetMessages()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -68,6 +77,16 @@ func (h *Handler) getLatestMessages(ctx *gin.Context) {
 		quantity = *reqBody.Quantity
 	}
 
+	if ctx.Query("expand") == "user" {
+		messages, err := h.storage.GetLatestMessagesExpandedUser(quantity)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, messages)
+	}
+
 	messages, err := h.storage.GetLatestMessages(quantity)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -78,7 +97,7 @@ func (h *Handler) getLatestMessages(ctx *gin.Context) {
 }
 
 type getMessagesRangeRequestBody struct {
-	FromID   uint64 `json:"fromId"            binding:"required,min=1"`
+	FromID   uint64 `json:"fromId"             binding:"required,min=1"`
 	Quantity *uint  `json:"quantity,omitempty"`
 }
 
@@ -92,6 +111,16 @@ func (h *Handler) getMessagesRange(ctx *gin.Context) {
 	quantity := DefaultRequestQuantity
 	if reqBody.Quantity != nil {
 		quantity = *reqBody.Quantity
+	}
+
+	if ctx.Query("expand") == "user" {
+		messages, err := h.storage.GetMessagesRangeExpandedUser(reqBody.FromID, quantity)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, messages)
 	}
 
 	messages, err := h.storage.GetMessagesRange(reqBody.FromID, quantity)
@@ -140,7 +169,7 @@ func (h *Handler) subscribeToMessages(ctx *gin.Context) {
 	for {
 		select {
 		case message := <-messageChan:
-			var msg models.Message
+			var msg models.MessageExpandedUser
 			json, err := marshalfromDBToJSON(message, &msg)
 			if err != nil {
 				unsubscribe <- struct{}{}
@@ -159,7 +188,7 @@ func (h *Handler) subscribeToMessages(ctx *gin.Context) {
 }
 
 type createMessageRequestBody struct {
-	UserID  uint64 `json:"userId" binding:"required,min=1"`
+	UserID  uint64 `json:"userId"  binding:"required,min=1"`
 	Content string `json:"content" binding:"required"`
 }
 
